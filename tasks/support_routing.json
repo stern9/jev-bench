@@ -1,0 +1,43 @@
+{
+  "name": "support_routing",
+  "description": "Route a customer support ticket to the right team",
+  "question": {
+    "type": "choice",
+    "instructions": "Which team should handle this customer support ticket?",
+    "criteria": {
+      "billing": "Charges, invoices, refunds, payment methods, pricing or subscription plan changes.",
+      "technical": "Bugs, errors, crashes, performance problems, integrations or anything not working as designed.",
+      "account": "Login, passwords, two-factor authentication, profile details, account access, ownership or deletion.",
+      "shipping": "Delivery status, tracking, lost or damaged packages, delivery addresses and returns logistics.",
+      "other": "Feedback, feature requests, partnerships, general questions or anything that fits no other team."
+    }
+  },
+  "examples": [
+    {"id": "sr-01", "state": "I was charged twice for my March subscription. Please refund the duplicate payment.", "expected": "billing"},
+    {"id": "sr-02", "state": "The app crashes every time I open the reports tab on Android 15.", "expected": "technical"},
+    {"id": "sr-03", "state": "I can't log in. The reset password email never arrives.", "expected": "account"},
+    {"id": "sr-04", "state": "My order #88213 says delivered but there's nothing at my door.", "expected": "shipping"},
+    {"id": "sr-05", "state": "Would love a dark mode for the dashboard!", "expected": "other"},
+    {"id": "sr-06", "state": "How do I switch from the monthly plan to annual billing?", "expected": "billing"},
+    {"id": "sr-07", "state": "Your Slack integration stopped posting notifications since yesterday.", "expected": "technical"},
+    {"id": "sr-08", "state": "I lost my phone and now can't get past two-factor authentication.", "expected": "account"},
+    {"id": "sr-09", "state": "The box arrived crushed and the mug inside is broken.", "expected": "shipping"},
+    {"id": "sr-10", "state": "We're a design agency interested in a reseller partnership. Who should we talk to?", "expected": "other"},
+    {"id": "sr-11", "state": "My card was declined but I know it has funds. Is your payment page broken?", "expected": "billing"},
+    {"id": "sr-12", "state": "Exports to CSV take over 10 minutes and then time out.", "expected": "technical"},
+    {"id": "sr-13", "state": "Please delete my account and all my data.", "expected": "account"},
+    {"id": "sr-14", "state": "Can I change the delivery address? I moved last week and the package hasn't shipped yet.", "expected": "shipping"},
+    {"id": "sr-15", "state": "Just wanted to say your support team was amazing last week. Thanks!", "expected": "other"},
+    {"id": "sr-16", "state": "I cancelled in January but I'm still being billed every month.", "expected": "billing"},
+    {"id": "sr-17", "state": "Getting a 500 error when I click Save on the settings page.", "expected": "technical"},
+    {"id": "sr-18", "state": "Our admin left the company. How do we transfer ownership of the workspace to me?", "expected": "account"},
+    {"id": "sr-19", "state": "Tracking hasn't updated in 9 days. Is my package lost?", "expected": "shipping"},
+    {"id": "sr-20", "state": "Do you have a student discount?", "expected": "billing"},
+    {"id": "sr-21", "state": "I updated my email address but I still get logged out every few minutes on Chrome.", "expected": "technical"},
+    {"id": "sr-22", "state": "Someone changed my password and email without my permission. I think I was hacked.", "expected": "account"},
+    {"id": "sr-23", "state": "I want to return these shoes. Where do I send them?", "expected": "shipping"},
+    {"id": "sr-24", "state": "Is there a public roadmap I can follow?", "expected": "other"},
+    {"id": "sr-25", "state": "The invoice PDF download button does nothing when I click it.", "expected": "technical"},
+    {"id": "sr-26", "state": "You refunded me but it went to my old card that's closed now. What happens to the money?", "expected": "billing"}
+  ]
+}

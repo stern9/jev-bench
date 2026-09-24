@@ -1,0 +1,38 @@
+{
+  "name": "phishing_check",
+  "description": "Flag messages that are phishing or scam attempts",
+  "question": {
+    "type": "noul",
+    "instructions": "Is this message a phishing or scam attempt?",
+    "criteria": {
+      "true": "The message tries to trick the reader into giving up credentials, money, personal data, or into clicking or installing something malicious.",
+      "false": "The message is legitimate, even if it is marketing, a notification or asks the reader to take an ordinary action."
+    }
+  },
+  "examples": [
+    {"id": "ph-01", "state": "Your Apple ID has been locked. Verify within 24 hours at apple-id-verify-secure.co or it will be permanently deleted.", "expected": true},
+    {"id": "ph-02", "state": "Hi team, reminder that the quarterly all-hands is Thursday at 10am in the main room. Slides are in the shared drive.", "expected": false},
+    {"id": "ph-03", "state": "Congratulations! You've won a $1,000 Walmart gift card. Pay the $4.99 shipping fee here to claim it.", "expected": true},
+    {"id": "ph-04", "state": "Your order #1123-445 has shipped. Track it any time from your account's Orders page.", "expected": false},
+    {"id": "ph-05", "state": "This is the CEO. I'm in a meeting and need you to buy five $200 Apple gift cards for a client. Send me the codes ASAP and keep it quiet.", "expected": true},
+    {"id": "ph-06", "state": "Your monthly statement is ready. Log in to online banking as usual to view it; we will never ask for your password by email.", "expected": false},
+    {"id": "ph-07", "state": "IRS NOTICE: You owe back taxes. Pay immediately with Bitcoin to avoid arrest. Call 1-800-555-0199.", "expected": true},
+    {"id": "ph-08", "state": "Weekend sale: 30% off all running shoes through Sunday. Unsubscribe at any time from your email preferences.", "expected": false},
+    {"id": "ph-09", "state": "Microsoft 365: Your mailbox is full. Click here and re-enter your password to keep receiving mail: m365-mailbox-upgrade.net/login", "expected": true},
+    {"id": "ph-10", "state": "GitHub: A new SSH key was added to your account. If this wasn't you, review your security settings.", "expected": false},
+    {"id": "ph-11", "state": "Hey it's me, I got a new number. My card isn't working, can you Venmo me $300 and I'll pay you back tonight?", "expected": true},
+    {"id": "ph-12", "state": "Your dentist appointment is confirmed for May 3 at 2:30pm. Reply C to confirm or R to reschedule.", "expected": false},
+    {"id": "ph-13", "state": "USPS: Your package could not be delivered due to an incomplete address. Update it here: usps-redelivery-help.info", "expected": true},
+    {"id": "ph-14", "state": "Invoice INV-2291 from Acme Hosting for $49.00 is attached. It will be charged to the card on file on the 1st.", "expected": false},
+    {"id": "ph-15", "state": "Dear beneficiary, a late relative left you $4.5M. To release the funds, send a copy of your passport and a processing fee.", "expected": true},
+    {"id": "ph-16", "state": "Slack: You have 3 unread messages in #design. Open Slack to catch up.", "expected": false},
+    {"id": "ph-17", "state": "Netflix: Payment declined. Update your billing within 12 hours to avoid suspension: netflix-billing-update.com", "expected": true},
+    {"id": "ph-18", "state": "Your one-time code is 482913. Don't share it with anyone. We will never call you to ask for it.", "expected": false},
+    {"id": "ph-19", "state": "HR here. Please review the attached updated salary adjustments.xlsm and enable macros to view.", "expected": true},
+    {"id": "ph-20", "state": "Reminder: your library books are due Friday. Renew online or at the front desk.", "expected": false},
+    {"id": "ph-21", "state": "Crypto opportunity: send 0.1 ETH to this wallet and we'll send back 0.2 ETH within an hour. Limited slots!", "expected": true},
+    {"id": "ph-22", "state": "Google: New sign-in on a Mac in Denver. If this was you, you don't need to do anything.", "expected": false},
+    {"id": "ph-23", "state": "Your PayPal account has been limited. Confirm your identity with your card number and SSN to restore access.", "expected": true},
+    {"id": "ph-24", "state": "The school fundraiser is next Saturday. Volunteers can sign up on the PTA website.", "expected": false}
+  ]
+}

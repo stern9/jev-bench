@@ -1,0 +1,38 @@
+{
+  "name": "incident_severity",
+  "description": "Grade an alert's severity for an on-call engineer",
+  "question": {
+    "type": "score",
+    "instructions": "How severe is this production alert for the on-call engineer?",
+    "criteria": [
+      "Low: informational or cosmetic; no user impact; can wait for normal working hours.",
+      "Medium: degraded experience or risk for a small set of users; fix within a day.",
+      "High: significant feature broken or many users affected; needs attention within the hour.",
+      "Critical: full outage, data loss, or security breach; page everyone now."
+    ]
+  },
+  "examples": [
+    {"id": "is-01", "state": "Checkout API returning 503 for 100% of requests across all regions for the last 6 minutes.", "expected": 3},
+    {"id": "is-02", "state": "Disk usage on the logging server reached 72%.", "expected": 0},
+    {"id": "is-03", "state": "Password reset emails delayed by ~20 minutes due to email provider backlog.", "expected": 1},
+    {"id": "is-04", "state": "Search results empty for all users since the 14:02 deploy; the rest of the site works.", "expected": 2},
+    {"id": "is-05", "state": "Unencrypted customer credit card numbers found in public S3 bucket access logs.", "expected": 3},
+    {"id": "is-06", "state": "A typo in the footer of the pricing page: 'Anual plan'.", "expected": 0},
+    {"id": "is-07", "state": "p99 latency on the dashboard up from 400ms to 1.2s; error rate unchanged.", "expected": 1},
+    {"id": "is-08", "state": "Mobile push notifications failing for all iOS users; Android unaffected.", "expected": 2},
+    {"id": "is-09", "state": "Primary database replica lag is 3 seconds, within normal range.", "expected": 0},
+    {"id": "is-10", "state": "Nightly job deleted production orders older than 30 days instead of the staging copy; backups are unverified.", "expected": 3},
+    {"id": "is-11", "state": "SSL certificate for the marketing blog expires in 21 days.", "expected": 0},
+    {"id": "is-12", "state": "One enterprise customer reports SSO login failures; other customers log in fine.", "expected": 1},
+    {"id": "is-13", "state": "Payments succeed but order confirmation emails are not being sent to anyone.", "expected": 2},
+    {"id": "is-14", "state": "Login page down for everyone; users cannot access the product at all.", "expected": 3},
+    {"id": "is-15", "state": "CPU on one of twelve web nodes spiking to 95%; load balancer has drained it.", "expected": 0},
+    {"id": "is-16", "state": "CSV export feature timing out for accounts with over 50k rows.", "expected": 1},
+    {"id": "is-17", "state": "About 40% of image uploads failing with a storage quota error.", "expected": 2},
+    {"id": "is-18", "state": "An admin API token was committed to a public GitHub repo 2 hours ago.", "expected": 3},
+    {"id": "is-19", "state": "Analytics dashboard counts page views from yesterday twice.", "expected": 1},
+    {"id": "is-20", "state": "Third-party status page reports our map provider is degraded; maps load slowly for some users.", "expected": 1},
+    {"id": "is-21", "state": "New signups failing for all users due to a broken captcha script.", "expected": 2},
+    {"id": "is-22", "state": "Deprecation warning in build logs for a dependency's legacy API.", "expected": 0}
+  ]
+}

@@ -1,0 +1,24 @@
+[project]
+name = "jev-bench"
+version = "0.1.0"
+description = "Benchmark TypeSafe's Jev (a System One model) against LLMs on fast, structured decision tasks"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+dependencies = [
+    "typesafe-sdk>=0.7.1",
+    "system-one-adapter[anthropic]>=0.2.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+jev-bench = "jevbench.__main__:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["jevbench"]
