@@ -46,3 +46,22 @@ def test_end_to_end(monkeypatch):
     assert abs(jev.cost_per_1k - 120 * 0.042 / 1e6 * 1000) < 1e-9
     md = render(records, "smoke")
     assert "## Headline" in md and "| Model | Accuracy" in md
+
+
+def test_merge_runs(tmp_path, monkeypatch):
+    import json
+    from jevbench import __main__ as cli
+    monkeypatch.setattr(cli, "RESULTS", tmp_path)
+    monkeypatch.setattr(runner, "make_caller", lambda model, stack: fake_caller(0.9))
+    tasks = load_tasks(["phishing_check"])
+    for name, models in [("20260101-000000", ["jev-latest", "claude-opus-5"]),
+                         ("20260102-000000", ["jev-latest", "claude-haiku-4-5"])]:
+        d = tmp_path / name
+        d.mkdir()
+        (d / "records.jsonl").write_text("".join(json.dumps(r.to_dict()) + "\n" for r in runner.run(tasks, models)))
+    cli.main(["report", str(tmp_path / "20260101-000000"), str(tmp_path / "20260102-000000")])
+    combined = next(tmp_path.glob("combined-*"))
+    records = [json.loads(l) for l in (combined / "records.jsonl").read_text().splitlines()]
+    assert {r["model"] for r in records} == {"jev-latest", "claude-opus-5", "claude-haiku-4-5"}
+    assert len(records) == 3 * len(tasks[0].examples)  # duplicate jev rows collapsed
+    assert "claude-haiku-4-5" in (combined / "report.md").read_text()
