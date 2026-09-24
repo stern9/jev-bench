@@ -20,9 +20,9 @@ The comparison is fair by construction. Jev is called via `typesafe-sdk`, and Cl
 | | `jev-latest` | `claude-haiku-4-5` | `claude-opus-5` |
 |---|---|---|---|
 | **Accuracy** (all 72) | **94.4%** | 91.7% | 98.6% |
-| **p50 latency** | **~180 ms** | ~1.4 s | ~2.6 s |
+| **p50 latency** | **~185 ms** | ~1.2 s | ~2.6 s |
 | **$ per 1k decisions** | **~$0.02** | ~$0.82 | ~$6.40 |
-| Speed vs Jev | 1× | ~8× slower | ~15× slower |
+| Speed vs Jev | 1× | ~7× slower | ~14× slower |
 
 | Task | Jev | Haiku 4.5 | Opus 5 |
 |---|---|---|---|
@@ -32,8 +32,8 @@ The comparison is fair by construction. Jev is called via `typesafe-sdk`, and Cl
 
 **Takeaways**
 
-- **Jev vs Haiku (fast vs fast):** Jev was more accurate on 2 of 3 tasks and tied the third, while being ~8× faster and ~50× cheaper.
-- **Jev vs Opus (the ceiling):** Opus 5 is the most accurate, but Jev reaches ~96% of its accuracy at ~1/15 the latency and a tiny fraction of the cost.
+- **Jev vs Haiku (fast vs fast):** Jev was more accurate on 2 of 3 tasks and tied the third, while being ~7× faster and ~50× cheaper.
+- **Jev vs Opus (the ceiling):** Opus 5 is the most accurate, but Jev reaches ~96% of its accuracy at ~1/14 the latency and a tiny fraction of the cost.
 - **Calibration:** Jev's confidence was well calibrated on routing (ECE 0.025, best of the three). On severity, Opus was the most accurate but the least calibrated (ECE 0.24): it tended to sound less sure than its hit rate justified.
 - **Where Jev missed:** adjacent severity levels (low vs medium), and one ticket that mixed login symptoms with a browser bug.
 
