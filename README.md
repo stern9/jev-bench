@@ -13,6 +13,34 @@ Jev doesn't generate text. It answers typed questions (`choice`, `score`, `noul`
 
 The comparison is fair by construction. Jev is called via `typesafe-sdk`, and Claude is called via [`system-one-adapter`](https://github.com/typesafe-ai/system-one-adapter-python), a drop-in replacement for the same `system_one()` API backed by Claude's structured outputs. Every model gets identical questions and is scored by identical code.
 
+## Results (2026-09-24)
+
+72 labeled decisions across 3 tasks. Every model got identical questions.
+
+| | `jev-latest` | `claude-haiku-4-5` | `claude-opus-5` |
+|---|---|---|---|
+| **Accuracy** (all 72) | **94.4%** | 91.7% | 98.6% |
+| **p50 latency** | **~180 ms** | ~1.4 s | ~2.6 s |
+| **$ per 1k decisions** | **~$0.02** | ~$0.82 | ~$6.40 |
+| Speed vs Jev | 1× | ~8× slower | ~15× slower |
+
+| Task | Jev | Haiku 4.5 | Opus 5 |
+|---|---|---|---|
+| `support_routing` (choice, 5 teams) | 96.2% · 183 ms | 92.3% · 1,530 ms | 100% · 2,548 ms |
+| `phishing_check` (yes/no) | 100% · 175 ms | 100% · 1,156 ms | 100% · 2,547 ms |
+| `incident_severity` (score 0–3) | 86.4% · 193 ms | 81.8% · 1,524 ms | 95.5% · 2,926 ms |
+
+**Takeaways**
+
+- **Jev vs Haiku (fast vs fast):** Jev was more accurate on 2 of 3 tasks and tied the third, while being ~8× faster and ~50× cheaper.
+- **Jev vs Opus (the ceiling):** Opus 5 is the most accurate, but Jev reaches ~96% of its accuracy at ~1/15 the latency and a tiny fraction of the cost.
+- **Calibration:** Jev's confidence was well calibrated on routing (ECE 0.025, best of the three). On severity, Opus was the most accurate but the least calibrated (ECE 0.24): it tended to sound less sure than its hit rate justified.
+- **Where Jev missed:** adjacent severity levels (low vs medium), and one ticket that mixed login symptoms with a browser bug.
+
+Full per-task tables, calibration metrics and every miss: [`docs/results-2026-09-24.md`](docs/results-2026-09-24.md).
+
+> **Caveats:** a small hand-labeled set (72 examples) and a single run. Latency is measured end-to-end from one laptop, including network. Claude models ran with default settings through `system-one-adapter` (Opus 5 uses adaptive thinking). Treat these results as directional, and add your own tasks for your use case.
+
 ## Tasks
 
 | Task | Type | Examples | Decision |
