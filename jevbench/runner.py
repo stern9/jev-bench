@@ -1,4 +1,8 @@
-"""Run tasks through Jev (TypeSafe API) or Claude (via system-one-adapter).
+"""Run tasks through Jev (TypeSafe API) or an LLM via system-one-adapter.
+
+Model ids: `jev*` goes to TypeSafe, `openai:<model>` to the OpenAI API,
+`local:<model>` to an OpenAI-compatible local server (llama.cpp, LM Studio,
+Ollama) at JEVBENCH_LOCAL_BASE_URL, and anything else to Claude.
 
 Both backends take the same `system_one(state, questions)` call and return a
 typesafe_sdk.SystemOneResponse, so every model is scored the same way.
@@ -6,6 +10,7 @@ Latency is wall-clock time around each call, measured the same for all models.
 """
 from __future__ import annotations
 
+import os
 import time
 from contextlib import ExitStack
 from dataclasses import asdict, dataclass
@@ -45,16 +50,32 @@ def is_jev(model: str) -> bool:
     return model.startswith("jev")
 
 
+def make_provider(model: str):
+    if model.startswith("openai:"):
+        from system_one_adapter.providers.openai import OpenAIProvider
+        return OpenAIProvider(model.removeprefix("openai:"))
+    if model.startswith("local:"):
+        from system_one_adapter.providers.openai import OpenAIProvider
+        return OpenAIProvider(
+            model.removeprefix("local:"),
+            base_url=os.environ.get("JEVBENCH_LOCAL_BASE_URL", "http://localhost:8080/v1"),
+            api_key=os.environ.get("JEVBENCH_LOCAL_API_KEY", "local"),
+        )
+    return AnthropicProvider(model, max_tokens=16000)
+
+
 def make_caller(model: str, stack: ExitStack) -> Callable:
     if is_jev(model):
         client = stack.enter_context(TypeSafeClient(model=model))
         return lambda state, questions: client.system_one(state, questions)
     client = stack.enter_context(SystemOneAdapterClient(
-        structured_outputs=True,
+        # Native structured outputs reject very large choice schemas (e.g. 75 categories);
+        # JEVBENCH_STRUCTURED_OUTPUTS=0 falls back to prompt-based JSON with retries.
+        structured_outputs=os.environ.get("JEVBENCH_STRUCTURED_OUTPUTS", "1") != "0",
         llm_answer_mode="probabilities",
         normalize_probabilities=True,
         n_retry_malformed_structure=2,
-        model=AnthropicProvider(model, max_tokens=16000),
+        model=make_provider(model),
     ))
     return lambda state, questions: client.system_one(state, questions)
 

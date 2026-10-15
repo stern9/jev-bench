@@ -12,6 +12,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
+openai = ["system-one-adapter[openai]>=0.2.1"]  # openai: and local: models
 
 [project.scripts]
 jev-bench = "jevbench.__main__:main"

@@ -7,16 +7,24 @@ from dataclasses import dataclass
 # USD per million tokens (input, output). Update when prices change.
 PRICES = {
     "jev": (0.042, 0.0),
+    "claude-opus-5-5": (4.00, 20.00),
+    "claude-sonnet-5-5": (2.00, 10.00),
+    "claude-haiku-5-5": (0.10, 0.50),
     "claude-opus-5": (5.00, 25.00),
     "claude-sonnet-5": (2.00, 10.00),
     "claude-haiku-4-5": (1.00, 5.00),
+    "gpt-6-astra": (10.00, 50.00),
+    "gpt-6.1-sol": (2.00, 10.00),
+    "gpt-6-luna": (0.10, 0.50),
 }
 
 
 def price_for(model: str) -> tuple[float, float] | None:
     if model.startswith("jev"):
         return PRICES["jev"]
-    return PRICES.get(model)
+    if model.startswith("local:"):
+        return (0.0, 0.0)  # runs on your own hardware
+    return PRICES.get(model.removeprefix("openai:"))
 
 
 @dataclass
