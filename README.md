@@ -1,8 +1,8 @@
 # jev-bench
 
-Benchmark **[Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev)**, TypeSafe's *System One* model, against Claude on the kind of fast, structured decisions software makes all day: routing, yes/no checks and graded ratings.
+Benchmark **[Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev)**, TypeSafe's *System One* model, against general-purpose LLMs (Claude, GPT, or local models) on the kind of fast, structured decisions software makes all day: routing, yes/no checks and graded ratings.
 
-Jev doesn't generate text. It answers typed questions (`choice`, `score`, `noul`) with a calibrated probability for every possible answer, in tens to hundreds of milliseconds. This harness asks both models **the exact same questions** and measures:
+Jev doesn't generate text. It answers typed questions (`choice`, `score`, `noul`) with a calibrated probability for every possible answer, in tens to hundreds of milliseconds. This harness asks every model **the exact same questions** and measures:
 
 | Metric | What it tells you |
 |---|---|
@@ -11,35 +11,49 @@ Jev doesn't generate text. It answers typed questions (`choice`, `score`, `noul`
 | **Calibration** (ECE, Brier) | When it says it's 90% sure, is it right 90% of the time? |
 | **Cost** per 1k calls | From reported token usage and list prices |
 
-The comparison is fair by construction. Jev is called via `typesafe-sdk`, and Claude is called via [`system-one-adapter`](https://github.com/typesafe-ai/system-one-adapter-python), a drop-in replacement for the same `system_one()` API backed by Claude's structured outputs. Every model gets identical questions and is scored by identical code.
+The comparison is fair by construction. Jev is called via `typesafe-sdk`, and every LLM is called via [`system-one-adapter`](https://github.com/typesafe-ai/system-one-adapter-python), a drop-in replacement for the same `system_one()` API backed by the LLM's structured outputs. Every model gets identical questions and is scored by identical code.
 
-## Results (2026-09-24)
+## Results (2026-10-14)
 
-72 labeled decisions across 3 tasks. Every model got identical questions.
+72 labeled decisions across 3 tasks, all run from the same laptop (Apple M5 Pro, 48 GB). "Speed vs Jev" compares p50 latency.
 
-| | `jev-latest` | `claude-haiku-4-5` | `claude-opus-5` |
-|---|---|---|---|
-| **Accuracy** (all 72) | **94.4%** | 91.7% | 98.6% |
-| **p50 latency** | **~185 ms** | ~1.2 s | ~2.6 s |
-| **$ per 1k decisions** | **~$0.02** | ~$0.82 | ~$6.40 |
-| Speed vs Jev | 1× | ~7× slower | ~14× slower |
+| Model | Accuracy (72) | p50 latency | $ per 1k decisions | Speed vs Jev |
+|---|---|---|---|---|
+| **`jev-latest`** | 94.4% | **171 ms** | **$0.017** | 1× |
+| `claude-haiku-5-5` | 95.8% | 1.44 s | $0.12 | ~8× slower |
+| `claude-sonnet-5-5` | 93.1% | 1.68 s | $2.14 | ~10× slower |
+| `claude-opus-5-5` | 97.2% | 2.12 s | $4.33 | ~12× slower |
+| `gpt-6-luna` | 97.2% | 1.90 s | $0.073 | ~11× slower |
+| `gpt-6.1-sol` | **100%** | 2.26 s | $1.31 | ~13× slower |
+| `gpt-6-astra` | **100%** | 2.26 s | $6.67 | ~13× slower |
 
-| Task | Jev | Haiku 4.5 | Opus 5 |
-|---|---|---|---|
-| `support_routing` (choice, 5 teams) | 96.2% · 183 ms | 92.3% · 1,530 ms | 100% · 2,548 ms |
-| `phishing_check` (yes/no) | 100% · 175 ms | 100% · 1,156 ms | 100% · 2,547 ms |
-| `incident_severity` (score 0–3) | 86.4% · 193 ms | 81.8% · 1,524 ms | 95.5% · 2,926 ms |
+| Task | Jev | Haiku 5.5 | Sonnet 5.5 | Opus 5.5 | GPT-6 Luna | GPT-6.1 Sol | GPT-6 Astra |
+|---|---|---|---|---|---|---|---|
+| `support_routing` (choice, 5 teams) | 96.2% | 96.2% | 92.3% | 96.2% | 100% | 100% | 100% |
+| `phishing_check` (yes/no) | 100% | 100% | 100% | 100% | 100% | 100% | 100% |
+| `incident_severity` (score 0–3) | 86.4% | 90.9% | 86.4% | 95.5% | 90.9% | 100% | 100% |
+
+**Local models** (free, run on the same laptop via LM Studio, MLX builds, 2026-10-15):
+
+| Model | Accuracy (72) | p50 latency | Speed vs Jev | Routing | Phishing | Severity |
+|---|---|---|---|---|---|---|
+| `gemma-4-26b-a4b` | 97.2% | 619 ms | ~4× slower | 100% | 100% | 90.9% |
+| `qwen3.6-27b` | 95.8% | 3.61 s | ~21× slower | 100% | 100% | 86.4% |
+| `qwen3.6-35b-a3b` | 76.4% | 597 ms | ~3.5× slower | 88.5% | 70.8% | 68.2% |
+| `gemma-4-e4b` | 70.8% | 889 ms | ~5× slower | 96.2% | 62.5% | 50.0% |
 
 **Takeaways**
 
-- **Jev vs Haiku (fast vs fast):** Jev was more accurate on 2 of 3 tasks and tied the third, while being ~7× faster and ~50× cheaper.
-- **Jev vs Opus (the ceiling):** Opus 5 is the most accurate, but Jev reaches ~96% of its accuracy at ~1/14 the latency and a tiny fraction of the cost.
-- **Calibration:** Jev's confidence was well calibrated on routing (ECE 0.025, best of the three). On severity, Opus was the most accurate but the least calibrated (ECE 0.24): it tended to sound less sure than its hit rate justified.
-- **Where Jev missed:** adjacent severity levels (low vs medium), and one ticket that mixed login symptoms with a browser bug.
+- **Speed and cost are Jev's edge:** it answered every question in under 250 ms (p95), 8–13× faster than any API model here and 3.5× faster than the quickest local one. Per decision it cost about 4× less than the cheapest LLM (GPT-6 Luna) and about 400× less than GPT-6 Astra.
+- **Accuracy is no longer a lead:** with this generation of models, Jev ties or trails the best LLM on every task. GPT-6.1 Sol and GPT-6 Astra got all 72 right. Haiku 5.5 edged Jev overall (69 vs 68 correct), at ~8× the latency and ~7× the cost.
+- **Best value among LLMs:** GPT-6 Luna reached 97.2% for $0.07 per 1k decisions. GPT-6.1 Sol was perfect at about a fifth of Astra's price.
+- **Local models are a real option:** Gemma 4 26B (A4B) matched Opus 5.5 and GPT-6 Luna at 97.2%, for free, at ~0.6 s per decision on a laptop. That's faster than every API model, though still ~4× slower than Jev. Qwen 3.6 35B (A3B) is just as fast but flagged ordinary messages as phishing. The small Gemma 4 E4B handled routing but not yes/no or severity.
+- **Calibration:** on routing, Jev (ECE 0.025) matched the GPT models (0.023–0.030) and beat every Claude model (0.08–0.13). On severity, the Claude models were the least calibrated (ECE 0.15–0.25).
+- **Where Jev missed:** adjacent severity levels (low vs medium), and the same login-plus-browser-bug ticket (`sr-21`) that Haiku, Sonnet and Opus also missed.
 
-Full per-task tables, calibration metrics and every miss: [`docs/results-2026-09-24.md`](docs/results-2026-09-24.md).
+Full per-task tables, calibration metrics and every miss: [`docs/results-2026-10-14.md`](docs/results-2026-10-14.md).
 
-> **Caveats:** a small hand-labeled set (72 examples) and a single run. Latency is measured end-to-end from one laptop, including network. Claude models ran with default settings through `system-one-adapter` (Opus 5 uses adaptive thinking). Treat these results as directional, and add your own tasks for your use case.
+> **Caveats:** a small hand-labeled set (72 examples) and a single run per model. Latency is measured end-to-end from one laptop, including network. Every LLM ran with its default settings (including default thinking and effort) through `system-one-adapter`: Claude via the Anthropic API, GPT via the OpenAI Responses API, local models via LM Studio (where both Qwen models answered without thinking). Prices are list prices as of 2026-10-14. Treat these results as directional, and add your own tasks for your use case.
 
 ## Tasks
 
@@ -56,15 +70,33 @@ Each task lives in `tasks/*.json` as one question plus labeled examples, includi
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e '.[dev]'
-cp .env.example .env        # add TYPESAFE_API_KEY and ANTHROPIC_API_KEY
+cp .env.example .env        # add TYPESAFE_API_KEY and ANTHROPIC_API_KEY (OPENAI_API_KEY optional)
 
 jev-bench tasks                                   # list tasks
 jev-bench run --limit 5                           # quick sanity run
-jev-bench run                                     # full run: jev-latest vs claude-opus-5
-jev-bench run --models jev-latest claude-opus-5 claude-haiku-4-5
+jev-bench run                                     # full run: jev-latest vs claude-opus-5-5
+jev-bench run --models jev-latest claude-opus-5-5 claude-haiku-5-5
 ```
 
 Each run writes `results/<timestamp>/records.jsonl` (every call, with its probabilities) and `report.md`.
+
+## OpenAI and local models
+
+Model ids pick the backend: `jev*` goes to TypeSafe, `openai:<id>` to the OpenAI API, `local:<id>` to an OpenAI-compatible server on your machine, and anything else to Claude.
+
+```bash
+pip install -e '.[dev,openai]'
+
+# OpenAI (set OPENAI_API_KEY in .env)
+jev-bench run --models jev-latest openai:gpt-6-luna openai:gpt-6.1-sol
+
+# Local: point JEVBENCH_LOCAL_BASE_URL at your server
+JEVBENCH_LOCAL_BASE_URL=http://localhost:11434/v1 jev-bench run --models local:qwen3.6:35b   # Ollama
+JEVBENCH_LOCAL_BASE_URL=http://localhost:1234/v1  jev-bench run --models local:<model-id>    # LM Studio
+JEVBENCH_LOCAL_BASE_URL=http://localhost:8080/v1  jev-bench run --models local:<model-id>    # llama.cpp llama-server
+```
+
+Local models are costed at $0, and their latency depends on your hardware. Local servers only use the response schema to constrain output, without showing it to the model, so the `local:` backend also puts the schema (which holds the questions) in the system prompt. LM Studio with MLX builds was the fastest setup on Apple Silicon in our runs; load the model first (`lms load <id>`) so load time isn't counted as latency.
 
 ## Add your own task
 

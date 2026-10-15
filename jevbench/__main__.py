@@ -17,7 +17,7 @@ from .report import render
 from .tasks import load_tasks
 
 RESULTS = Path(__file__).resolve().parent.parent / "results"
-DEFAULT_MODELS = ["jev-latest", "claude-opus-5"]
+DEFAULT_MODELS = ["jev-latest", "claude-opus-5-5"]
 
 
 def load_dotenv(path: Path) -> None:
@@ -92,7 +92,7 @@ def main(argv: list[str] | None = None) -> None:
     sub.add_parser("tasks", help="list tasks").set_defaults(fn=cmd_tasks)
     r = sub.add_parser("run", help="run tasks against models")
     r.add_argument("--models", nargs="+", default=DEFAULT_MODELS,
-                   help=f"model ids; jev* goes to TypeSafe, anything else to Claude (default: {' '.join(DEFAULT_MODELS)})")
+                   help=f"model ids; jev* goes to TypeSafe, openai:<id> to OpenAI, local:<id> to a local server, anything else to Claude (default: {' '.join(DEFAULT_MODELS)})")
     r.add_argument("--tasks", nargs="+", help="task names (default: all)")
     r.add_argument("--limit", type=int, help="max examples per task")
     r.set_defaults(fn=cmd_run)
