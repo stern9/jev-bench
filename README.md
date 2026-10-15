@@ -42,12 +42,22 @@ The comparison is fair by construction. Jev is called via `typesafe-sdk`, and ev
 | `qwen3.6-35b-a3b` | 76.4% | 597 ms | ~3.5× slower | 88.5% | 70.8% | 68.2% |
 | `gemma-4-e4b` | 70.8% | 889 ms | ~5× slower | 96.2% | 62.5% | 50.0% |
 
+## Verdict
+
+**Jev is by far the fastest and cheapest, but no longer the most accurate.** Most models, Jev included, land within 1–2 questions of each other (68–70 of 72), which is noise at this sample size. Only GPT-6.1 Sol and GPT-6 Astra clearly beat that band, and Jev's one real weakness is graded scales (severity).
+
+| If you need… | Use | Why |
+|---|---|---|
+| Decisions in the request path, at high volume | **Jev** | 171 ms and $0.017 per 1k: 8–13× faster than the API models and 4–400× cheaper, with accuracy in the same band |
+| Best accuracy, latency is OK | **GPT-6.1 Sol** | Perfect score at a fifth of Astra's price |
+| Cheap API calls | **GPT-6 Luna** | 97% for $0.07 per 1k, ahead of Haiku 5.5 |
+| Free, private or offline | **Gemma 4 26B (A4B)** | 97% at 0.6 s on a laptop, faster than any API model |
+
 **Takeaways**
 
 - **Speed and cost are Jev's edge:** it answered every question in under 250 ms (p95), 8–13× faster than any API model here and 3.5× faster than the quickest local one. Per decision it cost about 4× less than the cheapest LLM (GPT-6 Luna) and about 400× less than GPT-6 Astra.
 - **Accuracy is no longer a lead:** with this generation of models, Jev ties or trails the best LLM on every task. GPT-6.1 Sol and GPT-6 Astra got all 72 right. Haiku 5.5 edged Jev overall (69 vs 68 correct), at ~8× the latency and ~7× the cost.
-- **Best value among LLMs:** GPT-6 Luna reached 97.2% for $0.07 per 1k decisions. GPT-6.1 Sol was perfect at about a fifth of Astra's price.
-- **Local models are a real option:** Gemma 4 26B (A4B) matched Opus 5.5 and GPT-6 Luna at 97.2%, for free, at ~0.6 s per decision on a laptop. That's faster than every API model, though still ~4× slower than Jev. Qwen 3.6 35B (A3B) is just as fast but flagged ordinary messages as phishing. The small Gemma 4 E4B handled routing but not yes/no or severity.
+- **Local models vary a lot:** Gemma 4 26B (A4B) matched Opus 5.5 and GPT-6 Luna. Qwen 3.6 35B (A3B) is just as fast but flagged ordinary messages as phishing. The small Gemma 4 E4B handled routing but not yes/no or severity.
 - **Calibration:** on routing, Jev (ECE 0.025) matched the GPT models (0.023–0.030) and beat every Claude model (0.08–0.13). On severity, the Claude models were the least calibrated (ECE 0.15–0.25).
 - **Where Jev missed:** adjacent severity levels (low vs medium), and the same login-plus-browser-bug ticket (`sr-21`) that Haiku, Sonnet and Opus also missed.
 
